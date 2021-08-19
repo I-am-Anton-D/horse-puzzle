@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">HorsePuzzle</string>
+    <string name="new_game">New Game</string>
+    <string name="about">About</string>
+    <string name="settings">Settings</string>
+    <string name="main_image">Main Image</string>
+    <string name="exit">Exit</string>
+    <string name="count_of_rows">Count of rows:</string>
+    <string name="count_of_columns">Count of columns:</string>
+    <string name="finish_on_start">Finish on start</string>
+    <string name="count_of_hints">Count of hints:</string>
+    <string name="count_of_rows_text">%1$s  (from 1 to %1$s)</string>
+    <string name="count_of_columns_text">%1$s  (from A to %2$s)</string>
+    <string name="without_hints">without hints</string>
+    <string name="not_limited">not limited</string>
+    <string name="hint">Hint</string>
+    <string name="leftArrow"><![CDATA[<]]></string>
+    <string name="right_arrow"><![CDATA[>]]></string>
+    <string name="start">Start</string>
+    <string name="choose_start_field">"Choose start field... "</string>
+</resources>
