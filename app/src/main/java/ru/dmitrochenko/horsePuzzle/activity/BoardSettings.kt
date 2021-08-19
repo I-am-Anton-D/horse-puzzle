@@ -1,10 +1,11 @@
 package ru.dmitrochenko.horsePuzzle.activity
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import ru.dmitrochenko.horsePuzzle.R
+import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmSettingsDialog
 import ru.dmitrochenko.horsePuzzle.model.BoardSettingsData
 import ru.dmitrochenko.horsePuzzle.model.CheckBoardModel
 
@@ -31,10 +32,12 @@ class BoardSettings() : AppCompatActivity() {
         setHintText()
 
         nextBtn.setOnClickListener {
-            intent = Intent(this, CheckBoard::class.java)
-            intent.putExtra("EXTRA", boardSettings)
-            startActivity(intent)
-            finish()
+            if (boardSettings.selfCheck()) {
+                openCheckBoardActivity()
+            } else {
+                val confirmDialog = ConfirmSettingsDialog()
+                confirmDialog.show(supportFragmentManager, "confirmSettingsDialog");
+            }
         }
 
         countRowsSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -69,6 +72,13 @@ class BoardSettings() : AppCompatActivity() {
         finishOnStartCheckBox.setOnClickListener{
             boardSettings.finishOnStart = (it as CheckBox).isChecked
         }
+    }
+
+    fun openCheckBoardActivity() {
+        intent = Intent(this, CheckBoard::class.java)
+        intent.putExtra("EXTRA", boardSettings)
+        startActivity(intent)
+        finish()
     }
 
     private fun initViews() {

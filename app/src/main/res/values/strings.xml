@@ -11,11 +11,19 @@
     <string name="count_of_hints">Count of hints:</string>
     <string name="count_of_rows_text">%1$s  (from 1 to %1$s)</string>
     <string name="count_of_columns_text">%1$s  (from A to %2$s)</string>
+    <string name="choose_msg">You choose %1$s</string>
     <string name="without_hints">without hints</string>
     <string name="not_limited">not limited</string>
     <string name="hint">Hint</string>
     <string name="leftArrow"><![CDATA[<]]></string>
     <string name="right_arrow"><![CDATA[>]]></string>
     <string name="start">Start</string>
-    <string name="choose_start_field">"Choose start field... "</string>
+    <string name="choose_start_field">"Choose start field… "</string>
+    <string name="confirm_start_field">Confirm start field</string>
+    <string name="correct">Correct</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm_settings">Confirm settings</string>
+    <string name="bad_settings">With this setting no result, but you can try</string>
+    <string name="tryw">Try</string>
+
 </resources>

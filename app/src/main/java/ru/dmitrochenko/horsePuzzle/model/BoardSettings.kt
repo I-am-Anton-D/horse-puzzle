@@ -9,4 +9,9 @@ data class BoardSettingsData(
     var cols: Int = 4,
     var hints: Int = 3,
     var finishOnStart: Boolean = true
-) : Parcelable
+) : Parcelable {
+
+    fun selfCheck() : Boolean {
+        return rows*cols>=12
+    }
+}

@@ -9,6 +9,10 @@ class CheckBoardModel : ViewModel() {
     var finishOnStart = false
     var board = 0L
     var start = -1
+        set(value) {
+            field = value
+          //  board = HorsePuzzle.setPosition(value)
+        }
     var last = -1
     var current = -1;
 
@@ -17,6 +21,11 @@ class CheckBoardModel : ViewModel() {
         cols = settings.cols
         hints = settings.hints
         finishOnStart = settings.finishOnStart
+    }
+
+    fun isFieldAvailable(id: Int): Boolean {
+       // if (isFill(id)) return false
+        return true
     }
 
     companion object {
