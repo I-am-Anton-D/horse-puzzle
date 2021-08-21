@@ -9,7 +9,7 @@ import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmSettingsDialog
 import ru.dmitrochenko.horsePuzzle.model.BoardSettingsData
 import ru.dmitrochenko.horsePuzzle.model.CheckBoardModel
 
-class BoardSettings() : AppCompatActivity() {
+class BoardSettings : AppCompatActivity() {
 
     private lateinit var nextBtn: Button
     private lateinit var countRowsSeekBar: SeekBar
@@ -20,7 +20,7 @@ class BoardSettings() : AppCompatActivity() {
     private lateinit var countHintsText: TextView
     private lateinit var finishOnStartCheckBox: CheckBox
 
-    private val boardSettings : BoardSettingsData = BoardSettingsData();
+    private val boardSettings : BoardSettingsData = BoardSettingsData()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +36,7 @@ class BoardSettings() : AppCompatActivity() {
                 openCheckBoardActivity()
             } else {
                 val confirmDialog = ConfirmSettingsDialog()
-                confirmDialog.show(supportFragmentManager, "confirmSettingsDialog");
+                confirmDialog.show(supportFragmentManager, "confirmSettingsDialog")
             }
         }
 

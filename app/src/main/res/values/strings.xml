@@ -25,5 +25,6 @@
     <string name="confirm_settings">Confirm settings</string>
     <string name="bad_settings">With this setting no result, but you can try</string>
     <string name="tryw">Try</string>
+    <string name="available_combination">Available combination:</string>
 
 </resources>

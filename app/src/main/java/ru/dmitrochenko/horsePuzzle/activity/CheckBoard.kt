@@ -1,25 +1,38 @@
 package ru.dmitrochenko.horsePuzzle.activity
 
+import android.content.res.Resources
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.view.Gravity
 import android.view.View
-import android.view.View.TEXT_ALIGNMENT_TEXT_START
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.text.color
 import androidx.lifecycle.ViewModelProvider
 import ru.dmitrochenko.horsePuzzle.R
 import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmStartFieldDialog
+import ru.dmitrochenko.horsePuzzle.activity.view.Field
 import ru.dmitrochenko.horsePuzzle.model.BoardSettingsData
 import ru.dmitrochenko.horsePuzzle.model.CheckBoardModel
 
 
 class CheckBoard : AppCompatActivity() {
+    private var blackColor = 0
+    private var whiteColor = 0
+    private var orangeColor = 0
+
     private lateinit var grid: GridLayout
-    private lateinit var pathText: TextView
+    private lateinit var path: TextView
+    private lateinit var availText: TextView
+    private lateinit var backBtn: Button
+    private lateinit var forwardBtn: Button
+    private lateinit var hintBtn: Button
 
     private val boardModel: CheckBoardModel by lazy {
         ViewModelProvider(this).get(CheckBoardModel::class.java)
@@ -29,15 +42,29 @@ class CheckBoard : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_check_board)
 
+        initColors()
         initSettings()
         initBoard()
         initPath()
+        initCommandButtons()
+    }
+
+    private fun initColors() {
+        blackColor = ContextCompat.getColor(applicationContext, R.color.grey)
+        whiteColor = ContextCompat.getColor(applicationContext, R.color.white)
+        orangeColor = ContextCompat.getColor(applicationContext, R.color.orange)
     }
 
     private fun initSettings() {
         val boardSettings: BoardSettingsData? = intent.getParcelableExtra("EXTRA")
         if (boardSettings != null) {
             boardModel.applySettings(boardSettings)
+        }
+    }
+
+    private fun initPath() {
+        if (boardModel.moves.size > 0) {
+            showPath()
         }
     }
 
@@ -49,13 +76,142 @@ class CheckBoard : AppCompatActivity() {
                 grid.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 for (row in 0 until boardModel.rows) {
                     for (col in 0 until boardModel.cols) {
-                        val index = row * boardModel.cols + col;
+                        val index = row * boardModel.cols + col
                         val nButton = getNewButton(index, row, col)
                         grid.addView(nButton, index)
                     }
                 }
             }
         })
+    }
+
+    private fun initCommandButtons() {
+        path = findViewById(R.id.path)
+
+        backBtn = findViewById(R.id.leftBtn)
+        backBtn.setOnClickListener {
+            moveBack()
+        }
+        forwardBtn = findViewById(R.id.rightBtn)
+        forwardBtn.setOnClickListener {
+            moveForward()
+        }
+        hintBtn = findViewById(R.id.hintBtn)
+        hintBtn.text = getHintText()
+    }
+
+    private fun hintClick() {
+        if (boardModel.hints != 0 && boardModel.hints != 13) {
+            boardModel.hints--
+            hintBtn.text = getHintText()
+        }
+
+        if (boardModel.hints == 0) {
+            hintBtn.isEnabled = false
+        }
+    }
+
+    private fun getHintText(): String {
+        return if (boardModel.hints == 13) {
+            getString(R.string.hint)
+        } else {
+            getString(R.string.hint) + "(${boardModel.hints})"
+        }
+    }
+
+    private fun fieldClick(): (v: View) -> Unit = {
+        if (boardModel.currentIndex == -1) {
+            openConfirmStartFieldDialog(it)
+        }
+
+        if (boardModel.currentIndex >= 0 && boardModel.isFieldAvailable(it.id)) {
+            makeMove(it.id)
+        }
+    }
+
+    private fun makeMove(position: Int) {
+        setHorse(boardModel.getCurrentPosition())
+        boardModel.makeMove(position)
+        setActiveHorse(position)
+    }
+
+    private fun moveForward() {
+        if (!boardModel.stayOnLast()) {
+            setHorse(boardModel.getCurrentPosition())
+            boardModel.moveForward()
+            setActiveHorse(boardModel.getCurrentPosition())
+        }
+    }
+
+    private fun moveBack() {
+        if (boardModel.currentIndex > 0) {
+            unSetHorse(boardModel.getCurrentPosition())
+            boardModel.moveBack()
+            setActiveHorse(boardModel.getCurrentPosition())
+        }
+    }
+
+    private fun showPath() {
+        val pathText = SpannableStringBuilder().append(getPathBackText())
+            .color(orangeColor) { append(getPathActiveText()) }
+            .color(blackColor) { append(getPathForwardText()) }
+        path.text = pathText
+    }
+
+    private fun getPathBackText(): String {
+        var text = ""
+        for (i in 0 until boardModel.currentIndex) {
+            text += (i + 1).toString() + "." + boardModel.getFieldNameById(boardModel.moves[i]) + " "
+        }
+        return text
+    }
+
+    private fun getPathActiveText(): String {
+        return (boardModel.currentIndex + 1).toString() + "." +
+                boardModel.getFieldNameById(boardModel.getCurrentPosition()) + " "
+    }
+
+    private fun getPathForwardText(): String {
+        var text = ""
+        for (i in boardModel.currentIndex + 1 until boardModel.moves.size) {
+            text += (i + 1).toString() + "." + boardModel.getFieldNameById(boardModel.moves[i]) + " "
+        }
+        return text
+    }
+
+    fun setStartField(position: Int) {
+        boardModel.setStartPosition(position)
+        setActiveHorse(position)
+        val chooser: TextView = findViewById(R.id.chooseStartField)
+        chooser.visibility = GONE
+        showPath()
+
+        if (boardModel.hints != 0) {
+            hintBtn.isEnabled = true
+            hintBtn.setOnClickListener { hintClick() }
+        }
+
+        availText = findViewById(R.id.availCombination)
+        availText.visibility = VISIBLE
+    }
+
+
+
+    private fun setActiveHorse(position: Int) {
+        (grid.getChildAt(position) as Field).setActiveHorse()
+        showPath()
+    }
+
+    private fun setHorse(position: Int) {
+        (grid.getChildAt(position) as Field).setHorse()
+    }
+
+    private fun unSetHorse(position: Int) {
+        (grid.getChildAt(position) as Field).unSetHorse()
+    }
+
+    private fun unMarkField(id: Int) {
+        (grid.getChildAt(id) as Field).umMark()
     }
 
     private fun getNewButton(index: Int, row: Int, col: Int): Button {
@@ -68,17 +224,16 @@ class CheckBoard : AppCompatActivity() {
             setPadding(cellDim / 20, 0, 0, 0)
 
             if (CheckBoardModel.isWhite(row, col)) {
-                white = true
-                fieldColor = ContextCompat.getColor(context, R.color.white)
-                fieldTextColor = ContextCompat.getColor(context, R.color.grey)
+                fieldColor = whiteColor
+                fieldTextColor = blackColor
             } else {
-                white = false
-                fieldColor = ContextCompat.getColor(context, R.color.grey)
-                fieldTextColor = ContextCompat.getColor(context,  R.color.white)
+                fieldColor = blackColor
+                fieldTextColor = whiteColor
             }
 
-            markColor = ContextCompat.getColor(context, R.color.orange)
-            horseDrw = R.drawable.ic_h2
+            markColor = orangeColor
+            horseDrw = R.drawable.ic_h3
+            horseActiveDrw = R.drawable.ic_h3_active
 
             layoutParams = GridLayout.LayoutParams().apply {
                 rowSpec = GridLayout.spec(boardModel.rows - row - 1)
@@ -93,64 +248,20 @@ class CheckBoard : AppCompatActivity() {
     private fun calculateCellDim(): Int {
         val screen = findViewById<View>(R.id.boardScreen)
         val width = screen.width
+        val margin = (12 * Resources.getSystem().displayMetrics.density).toInt()
         return if (boardModel.rows > boardModel.cols) {
             width / boardModel.rows
         } else {
-            ((0.97 * width).toInt()) / boardModel.cols
+            (width - margin) / boardModel.cols
         }
-    }
-
-    private fun fieldClick(): (v: View) -> Unit = {
-        if (boardModel.start == -1) {
-            (it as Field).mark()
-            openConfirmStartFieldDialog(it)
-        } else {
-            if (boardModel.isFieldAvailable(it.id)) {
-                setHorse(it.id)
-            }
-        }
-
-
-
-    }
-
-    private fun initPath() {
-        if (boardModel.start >=0) {
-            showPath()
-        }
-    }
-
-    private fun showPath() {
-        pathText = findViewById(R.id.pathText)
-        pathText.textAlignment = TEXT_ALIGNMENT_TEXT_START
-        pathText.text = "HERE PATH"
-    }
-
-    fun setStartField(id:Int) {
-        boardModel.start = id
-        setHorse(id)
-        showPath()
-    }
-
-    private fun setHorse(id: Int) {
-        (grid.getChildAt(id) as Field).setHorse()
-    }
-
-    fun cancelSetStartField(id:Int) {
-         unMarkField(id)
-    }
-
-    private fun unMarkField(id: Int) {
-        (grid.getChildAt(id) as Field).umMark()
     }
 
     private fun openConfirmStartFieldDialog(it: View) {
         val confirmDialog = ConfirmStartFieldDialog()
         confirmDialog.arguments = Bundle().apply {
-            putString("FIELD_NAME", CheckBoardModel.getFieldNameById(it.id, boardModel.cols))
+            putString("FIELD_NAME", boardModel.getFieldNameById(it.id))
             putInt("FIELD_ID", it.id)
         }
-        confirmDialog.show(supportFragmentManager, "confirmStartFieldDialog");
+        confirmDialog.show(supportFragmentManager, "confirmStartFieldDialog")
     }
-
 }

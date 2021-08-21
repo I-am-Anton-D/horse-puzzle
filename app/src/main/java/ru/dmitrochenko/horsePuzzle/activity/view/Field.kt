@@ -1,4 +1,4 @@
-package ru.dmitrochenko.horsePuzzle.activity
+package ru.dmitrochenko.horsePuzzle.activity.view
 
 import android.content.Context
 import android.util.AttributeSet
@@ -13,9 +13,9 @@ class Field @JvmOverloads constructor(
     defStyle: Int = 0
 ) : AppCompatButton(context, attrs, defStyle) {
 
-    var horseDrw = 0;
+    var horseDrw = 0
+    var horseActiveDrw = 0
     var markColor = 0
-    var white = false
     var fieldColor = 0
         set(value) {
             field = value
@@ -42,9 +42,15 @@ class Field @JvmOverloads constructor(
                 BlendModeCompat.DST_OVER)
     }
 
+    fun setActiveHorse() {
+        setBackgroundResource(horseActiveDrw)
+        background.colorFilter =
+            BlendModeColorFilterCompat.createBlendModeColorFilterCompat(fieldColor,
+                BlendModeCompat.DST_OVER)
+    }
+
     fun unSetHorse() {
         setBackgroundResource(0)
         setBackgroundColor(fieldColor)
     }
-
 }

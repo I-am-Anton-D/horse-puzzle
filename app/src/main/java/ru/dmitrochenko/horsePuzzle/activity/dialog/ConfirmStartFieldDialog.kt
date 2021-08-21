@@ -22,10 +22,7 @@ class ConfirmStartFieldDialog : DialogFragment() {
                     (activity as CheckBoard).setStartField(fieldId)
                 }
                 .setNegativeButton(getString(R.string.cancel)
-                ) { _, _ ->
-                    (activity as CheckBoard).cancelSetStartField(fieldId)
-                }
-
+                ) { _, _ ->}
             builder.create()
 
         } ?: throw IllegalStateException("Activity cannot be null")
