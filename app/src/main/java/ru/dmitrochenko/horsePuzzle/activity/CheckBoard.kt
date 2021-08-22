@@ -2,6 +2,8 @@ package ru.dmitrochenko.horsePuzzle.activity
 
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.SpannableStringBuilder
 import android.view.Gravity
 import android.view.View
@@ -20,12 +22,19 @@ import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmStartFieldDialog
 import ru.dmitrochenko.horsePuzzle.activity.view.Field
 import ru.dmitrochenko.horsePuzzle.model.BoardSettingsData
 import ru.dmitrochenko.horsePuzzle.model.CheckBoardModel
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 
 class CheckBoard : AppCompatActivity() {
+    private var executor: ExecutorService = Executors.newSingleThreadExecutor()
+    private val handler = Handler(Looper.getMainLooper())
+
     private var blackColor = 0
     private var whiteColor = 0
     private var orangeColor = 0
+    private var hintField = -1
+    private var hintMove = false;
 
     private lateinit var grid: GridLayout
     private lateinit var path: TextView
@@ -33,6 +42,8 @@ class CheckBoard : AppCompatActivity() {
     private lateinit var backBtn: Button
     private lateinit var forwardBtn: Button
     private lateinit var hintBtn: Button
+
+    private var excCount = 0
 
     private val boardModel: CheckBoardModel by lazy {
         ViewModelProvider(this).get(CheckBoardModel::class.java)
@@ -87,6 +98,7 @@ class CheckBoard : AppCompatActivity() {
 
     private fun initCommandButtons() {
         path = findViewById(R.id.path)
+        availText = findViewById(R.id.availCombination)
 
         backBtn = findViewById(R.id.leftBtn)
         backBtn.setOnClickListener {
@@ -104,6 +116,11 @@ class CheckBoard : AppCompatActivity() {
         if (boardModel.hints != 0 && boardModel.hints != 13) {
             boardModel.hints--
             hintBtn.text = getHintText()
+        }
+
+        hintField = boardModel.getHint().toInt()
+        if (hintField != -1) {
+            (grid.getChildAt(hintField) as Field).mark()
         }
 
         if (boardModel.hints == 0) {
@@ -130,6 +147,7 @@ class CheckBoard : AppCompatActivity() {
     }
 
     private fun makeMove(position: Int) {
+        hintMove = position == hintField
         setHorse(boardModel.getCurrentPosition())
         boardModel.makeMove(position)
         setActiveHorse(position)
@@ -156,6 +174,9 @@ class CheckBoard : AppCompatActivity() {
             .color(orangeColor) { append(getPathActiveText()) }
             .color(blackColor) { append(getPathForwardText()) }
         path.text = pathText
+        if (!boardModel.noHints) {
+            getCombination()
+        }
     }
 
     private fun getPathBackText(): String {
@@ -181,25 +202,66 @@ class CheckBoard : AppCompatActivity() {
 
     fun setStartField(position: Int) {
         boardModel.setStartPosition(position)
-        setActiveHorse(position)
         val chooser: TextView = findViewById(R.id.chooseStartField)
         chooser.visibility = GONE
-        showPath()
 
         if (boardModel.hints != 0) {
             hintBtn.isEnabled = true
             hintBtn.setOnClickListener { hintClick() }
         }
-
-        availText = findViewById(R.id.availCombination)
         availText.visibility = VISIBLE
+        setActiveHorse(position)
     }
 
+    private fun getCombination() {
+        availText.text = getString(R.string.calculate)
+        hintBtn.isEnabled = false
 
+        val full = boardModel.getCountOfRemainingMoves() < 30
+
+        if (!full && (!boardModel.checkBoard() || boardModel.getAvailablePositions().isEmpty())) {
+            availText.text = getString(R.string.no_combination)
+            return
+        }
+
+        executor.execute {
+            excCount++
+            val count = if (full) boardModel.fullCalculate() else boardModel.limitCalculate()
+            handler.post {
+                if (excCount == 1) {
+                    postCombination(count, full)
+                }
+                excCount--
+            }
+        }
+    }
+
+    private fun postCombination(count: Long, full: Boolean) {
+        if (count == 0L && !hintMove) {
+            availText.text =
+                if (full) getString(R.string.no_combination) else getString(R.string.maybe_not)
+        } else {
+            hintBtn.isEnabled = boardModel.hints > 0
+            if (boardModel.hints == 13) {
+                availText.text =
+                    if (full) getString(R.string.full_avail_combination, count.toString()) else
+                        getString(R.string.available_combination_count, count.toString())
+            } else {
+                availText.text =
+                    getString(R.string.available_combination) + boardModel.getHint().toString()
+            }
+        }
+    }
 
     private fun setActiveHorse(position: Int) {
+        unMarkField(hintField)
+        hintField = -1;
         (grid.getChildAt(position) as Field).setActiveHorse()
-        showPath()
+        if (boardModel.getCountOfRemainingMoves() == 0) {
+            hintBtn.isEnabled = false;
+        } else {
+            showPath()
+        }
     }
 
     private fun setHorse(position: Int) {
@@ -210,8 +272,9 @@ class CheckBoard : AppCompatActivity() {
         (grid.getChildAt(position) as Field).unSetHorse()
     }
 
-    private fun unMarkField(id: Int) {
-        (grid.getChildAt(id) as Field).umMark()
+    private fun unMarkField(position: Int) {
+        if (position<0) return
+        (grid.getChildAt(position) as Field).unMark()
     }
 
     private fun getNewButton(index: Int, row: Int, col: Int): Button {

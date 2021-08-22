@@ -11,7 +11,7 @@ data class BoardSettingsData(
     var finishOnStart: Boolean = true
 ) : Parcelable {
 
-    fun selfCheck() : Boolean {
-        return rows*cols>=12
+    fun selfCheck(): Boolean {
+        return rows * cols >= 12
     }
 }

@@ -53,7 +53,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginStart="6dp"
         android:textColor="@color/black"
-        android:text="@string/available_combination"
+        tools:text="@string/available_combination"
         android:textSize="15sp"
         android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@+id/pathLayout"

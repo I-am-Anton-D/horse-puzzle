@@ -39,6 +39,5 @@ class MainActivity : AppCompatActivity() {
         exitBtn.setOnClickListener{
             this.finish()
         }
-
     }
 }

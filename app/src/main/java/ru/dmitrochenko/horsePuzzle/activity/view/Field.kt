@@ -31,7 +31,7 @@ class Field @JvmOverloads constructor(
         setBackgroundColor(markColor)
     }
 
-    fun umMark() {
+    fun unMark() {
         setBackgroundColor(fieldColor)
     }
 

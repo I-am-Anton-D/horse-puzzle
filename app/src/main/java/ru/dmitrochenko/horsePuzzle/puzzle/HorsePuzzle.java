@@ -7,9 +7,12 @@ import java.util.stream.Collectors;
 public class HorsePuzzle {
     final int cols;
     final int rows;
-    final int startList;
+    final int start;
     public int moveCount = 0;
     final int shift;
+    public int countPosition;
+    private byte hintPosition;
+
 
     static final int[][] moveOffset = new int[][]
             {{+1, +2}, {-1, +2}, {-2, +1}, {-2, -1}, {-1, -2}, {+1, -2}, {+2, -1}, {+2, +1}};
@@ -21,13 +24,13 @@ public class HorsePuzzle {
     public HorsePuzzle(int rows, int cols, int start) {
         this.cols = cols;
         this.rows = rows;
-        this.startList = start;
+        this.start = start;
         this.shift = 2 * cols + 1;
         initMoveAndMaskMap();
         initMoveByDiffMap();
     }
 
-       private void initMoveByDiffMap() {
+    private void initMoveByDiffMap() {
         moveByDiff = new byte[2 * shift + 1];
 
         moveByDiff[-2 * cols - 1 + shift] = 4;
@@ -44,7 +47,7 @@ public class HorsePuzzle {
         moveMap = new byte[rows * cols][3][];
         maskMap = new long[rows * cols];
         long board = 0;
-        board = setBit(board, (byte) startList);
+        board = setBit(board, (byte) start);
 
         for (int position = 0; position < moveMap.length; position++) {
             byte[] availableMoves = getAvailableMoves(board, position);
@@ -77,9 +80,9 @@ public class HorsePuzzle {
         List<long[]> parts = new ArrayList<>();
         long[] p = new long[5];
         long startBoard = 0;
-        startBoard = setBit(startBoard, (byte) startList);
+        startBoard = setBit(startBoard, (byte) start);
         p[3] = startBoard;
-        p[4] = startList;
+        p[4] = start;
         parts.add(p);
         while (parts.size() < 10000000) {
             parts = parts.stream().map(this::proceedBoard)
@@ -112,8 +115,8 @@ public class HorsePuzzle {
     public void calculate() {
 
         long[] p = new long[5];
-        p[3] = setBit(0L, (byte) startList);
-        p[4] = startList;
+        p[3] = setBit(0L, (byte) start);
+        p[4] = start;
 
         List<long[]> startList = new ArrayList<>();
         startList.add(p);
@@ -126,6 +129,61 @@ public class HorsePuzzle {
         }
 
         System.out.println("Found = " + startList.size() + " Time = ");
+    }
+
+    public long calculatePosition(long board, long start, int movesCount) {
+        hintPosition = -1;
+        long[] p = new long[5];
+        p[3] = board;
+        p[4] = start;
+
+        List<long[]> startList = new ArrayList<>();
+        startList.add(p);
+
+        for (int i = 0; i < rows * cols - 1 - movesCount; i++) {
+            startList = startList.stream().unordered().parallel().map(this::proceedBoard)
+                    .flatMap(Collection::stream).collect(Collectors.toList());
+            if (startList.isEmpty()) break;
+        }
+
+        countPosition = startList.size();
+        if (countPosition>0) {
+            int moves = rows * cols - 1 - movesCount;
+            hintPosition = getMovePosition(readLong(startList.get(0)[0], moves)[0],(int) start);
+        }
+        return countPosition;
+    }
+
+    public long calculateLimitPosition(long board, long start, int movesCount) {
+        hintPosition = -1;
+        int limit = 15000;
+        int iteration = 0;
+        List<long[]> startList = new ArrayList<>();
+        while (startList.isEmpty() && iteration != 3) {
+            long[] p = new long[5];
+            p[3] = board;
+            p[4] = start;
+            startList.add(p);
+            for (int i = 0; i < rows * cols - 1 - movesCount; i++) {
+                Collections.shuffle(startList);
+                startList = startList.stream().unordered().limit(limit).parallel().map(this::proceedBoard)
+                        .flatMap(Collection::stream).collect(Collectors.toList());
+                if (startList.isEmpty()) break;
+            }
+            iteration++;
+
+        }
+        countPosition = startList.size();
+        if (countPosition>0) {
+            int moves = rows * cols - 1 - movesCount;
+            hintPosition = getMovePosition(readLong(startList.get(0)[0], moves)[0],(int) start);
+        }
+
+        return countPosition;
+    }
+
+    public byte getHint() {
+        return hintPosition;
     }
 
     private List<long[]> proceedBoard(long[] path) {
@@ -141,7 +199,7 @@ public class HorsePuzzle {
         byte movePosition = 0;
         long avail = ~board & mask;
 
-        while (avail != 0) {
+        while (avail != 0 && movePosition!=64) {
             int countOfZeros = Long.numberOfTrailingZeros(avail);
             movePosition += countOfZeros;
             avail = avail >> (countOfZeros + 1);
@@ -164,7 +222,7 @@ public class HorsePuzzle {
         return boards == null ? Collections.emptyList() : boards;
     }
 
-    private boolean checkBoard(long board) {
+    public boolean checkBoard(long board) {
         long empty = ~board;
         int position = Long.numberOfTrailingZeros(empty);
         empty = empty >> (position + 1);
@@ -311,8 +369,8 @@ public class HorsePuzzle {
 
     public long[] convertToBoard(long[] path) {
         long board = 0;
-        board = setBit(board, (byte) startList);
-        int fromPosition = startList;
+        board = setBit(board, (byte) start);
+        int fromPosition = start;
 
         for (byte move : readPath(path)) {
             byte movePosition = getMovePosition(move, fromPosition);

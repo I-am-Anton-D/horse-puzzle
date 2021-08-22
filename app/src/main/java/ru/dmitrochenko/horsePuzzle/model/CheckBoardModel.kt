@@ -8,6 +8,7 @@ class CheckBoardModel : ViewModel() {
     var cols = 4
     var hints = 3
     var finishOnStart = false
+    var noHints = false
 
     var board = 0L
     var currentIndex = -1
@@ -21,13 +22,18 @@ class CheckBoardModel : ViewModel() {
         cols = settings.cols
         hints = settings.hints
         finishOnStart = settings.finishOnStart
+        noHints = hints == 0
     }
 
     fun isFieldAvailable(id: Int): Boolean {
         return id.toByte() in availPosition
     }
 
-    private fun getAvailablePositions() {
+    fun getAvailablePositions():ByteArray {
+        return availPosition
+    }
+
+    fun initAvailablePositions() {
         availPosition = puzzle.getAvailablePosition(board, moves[currentIndex])
     }
 
@@ -43,14 +49,14 @@ class CheckBoardModel : ViewModel() {
         }
         moves.add(position)
         currentIndex = moves.size - 1
-        getAvailablePositions()
+        initAvailablePositions()
     }
 
     fun moveBack() {
         if (currentIndex > 0) {
             board = puzzle.unSetBit(board, moves[currentIndex])
             currentIndex--
-            getAvailablePositions()
+            initAvailablePositions()
         }
     }
 
@@ -58,7 +64,7 @@ class CheckBoardModel : ViewModel() {
         if (!stayOnLast()) {
             currentIndex++
             board = puzzle.setBit(board, moves[currentIndex].toByte())
-            getAvailablePositions()
+            initAvailablePositions()
         }
     }
 
@@ -74,6 +80,26 @@ class CheckBoardModel : ViewModel() {
         val row = id / cols
         val col = id - row * cols
         return getColumnLetter(col) + (row + 1).toString()
+    }
+
+    fun fullCalculate():Long {
+        return puzzle.calculatePosition(board, getCurrentPosition().toLong(), moves.subList(0,currentIndex).size)
+    }
+
+    fun limitCalculate():Long {
+        return puzzle.calculateLimitPosition(board, getCurrentPosition().toLong(), moves.subList(0,currentIndex).size)
+    }
+
+    fun getCountOfRemainingMoves():Int {
+        return rows * cols - moves.subList(0, currentIndex).size - 1
+    }
+
+    fun checkBoard(): Boolean {
+        return puzzle.checkBoard(board)
+    }
+
+    fun getHint():Byte {
+        return puzzle.getHint();
     }
 
     companion object {

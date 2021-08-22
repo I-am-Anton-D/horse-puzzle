@@ -7,7 +7,7 @@
     <string name="exit">Exit</string>
     <string name="count_of_rows">Count of rows:</string>
     <string name="count_of_columns">Count of columns:</string>
-    <string name="finish_on_start">Finish on start</string>
+    <string name="finish_on_start">Back to start field</string>
     <string name="count_of_hints">Count of hints:</string>
     <string name="count_of_rows_text">%1$s  (from 1 to %1$s)</string>
     <string name="count_of_columns_text">%1$s  (from A to %2$s)</string>
@@ -25,6 +25,10 @@
     <string name="confirm_settings">Confirm settings</string>
     <string name="bad_settings">With this setting no result, but you can try</string>
     <string name="tryw">Try</string>
-    <string name="available_combination">Available combination:</string>
-
+    <string name="available_combination">Combination exist</string>
+    <string name="available_combination_count">Minimum combination count: %1$s</string>
+    <string name="maybe_not">Maybe combination not exist</string>
+    <string name="no_combination">Combination NOT exist</string>
+    <string name="calculate">Calculate…</string>
+    <string name="full_avail_combination">Count of available combination: %1$s</string>
 </resources>

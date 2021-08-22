@@ -140,14 +140,20 @@ class HorsePuzzleTest {
     }
 
 
-    @RepeatedTest(20)
+    @RepeatedTest(1)
 
         // 4/5 - 9 5/5 - 33 5/6 - 400 |||| 5/5 - 30 5/6 - 350 ||||| 4/5 - 6 5/5 - 25 5/6 - 305 ||||| 4/5 - 5 5/5 - 22.5 5/6 - 330 |||||| 5/5 - 19 5/6 - 300 ||||
         // 5/5 - 12 5/6 - 155 6/6
         //@Test
     void calculate() {
-        HorsePuzzle hp = new HorsePuzzle(5, 6, 0);
-        hp.calculate();
+        int rows = 5;
+        int cols = 5;
+        for (int i = 0; i <rows*cols - 1 ; i++) {
+            System.out.println(i);
+            HorsePuzzle hp = new HorsePuzzle(rows, cols, i);
+            hp.calculate();
+        }
+
     }
 
     @RepeatedTest(1)
@@ -236,4 +242,11 @@ class HorsePuzzleTest {
         System.out.println(System.currentTimeMillis() - start);
         System.out.println(result.size());
     }
+
+    @RepeatedTest(10)
+    void limit() {
+        HorsePuzzle hp = new HorsePuzzle(8, 8, 0);
+        hp.calculateLimitPosition(0,0,0);
+    }
+
 }
