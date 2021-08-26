@@ -4,6 +4,8 @@ package ru.dmitrochenko.horsePuzzle.puzzle;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
+
 public class HorsePuzzle {
     final int cols;
     final int rows;
@@ -12,11 +14,15 @@ public class HorsePuzzle {
     final int shift;
     public int countPosition;
     private byte hintPosition;
+    private boolean isCanceled = false;
+    private List<byte[]> hintsPaths = new ArrayList<>();
+    private List<Byte> hintsMoves = new ArrayList<>();
+    private List<long[]> startList = new ArrayList<>();
 
 
     static final int[][] moveOffset = new int[][]
             {{+1, +2}, {-1, +2}, {-2, +1}, {-2, -1}, {-1, -2}, {+1, -2}, {+2, -1}, {+2, +1}};
-    //    0          1         2        3         4          5          6        7
+           //    0          1         2        3         4          5          6        7
     long[] maskMap;
     byte[][][] moveMap;
     byte[] moveByDiff;
@@ -76,6 +82,10 @@ public class HorsePuzzle {
         }
     }
 
+    public void cancelCalculate() {
+        isCanceled = true;
+    }
+
     public void calculateByParts() {
         List<long[]> parts = new ArrayList<>();
         long[] p = new long[5];
@@ -86,7 +96,7 @@ public class HorsePuzzle {
         parts.add(p);
         while (parts.size() < 10000000) {
             parts = parts.stream().map(this::proceedBoard)
-                    .flatMap(Collection::stream).collect(Collectors.toList());
+                    .flatMap(Collection::stream).collect(toList());
             moveCount++;
             if (parts.isEmpty()) break;
         }
@@ -123,7 +133,7 @@ public class HorsePuzzle {
 
         for (int i = 0; i < (rows * cols) - 1; i++) {
             startList = startList.stream().unordered().parallel().map(this::proceedBoard)
-                    .flatMap(Collection::stream).collect(Collectors.toList());
+                    .flatMap(Collection::stream).collect(toList());
             System.out.println("Move = " + (i + 1) + " Boards = " + startList.size());
             if (startList.isEmpty()) break;
         }
@@ -142,49 +152,74 @@ public class HorsePuzzle {
 
         for (int i = 0; i < rows * cols - 1 - movesCount; i++) {
             startList = startList.stream().unordered().parallel().map(this::proceedBoard)
-                    .flatMap(Collection::stream).collect(Collectors.toList());
+                    .flatMap(Collection::stream).collect(toList());
             if (startList.isEmpty()) break;
         }
 
         countPosition = startList.size();
-        if (countPosition>0) {
+        if (countPosition > 0) {
             int moves = rows * cols - 1 - movesCount;
-            hintPosition = getMovePosition(readLong(startList.get(0)[0], moves)[0],(int) start);
+            //hintPosition = getMovePosition(readPath(startList.get(0))[0], (int) start);
         }
         return countPosition;
     }
 
-    public long calculateLimitPosition(long board, long start, int movesCount) {
+    private int initCalculate(int limit) {
+        isCanceled = false;
         hintPosition = -1;
-        int limit = 15000;
-        int iteration = 0;
-        List<long[]> startList = new ArrayList<>();
+        hintsMoves.clear();
+        hintsPaths.clear();
+        startList.clear();
+        return (limit == Integer.MAX_VALUE) ? 2 : 0;
+    }
+
+    private void initPath(long board, long start) {
+        long[] p = new long[5];
+        p[3] = board;
+        p[4] = start;
+        startList.add(p);
+        moveCount = 0;
+    }
+
+    public long calculateLimitPosition(long board, long start, int madeMoves, int limit) {
+        int iteration = initCalculate(limit);
         while (startList.isEmpty() && iteration != 3) {
-            long[] p = new long[5];
-            p[3] = board;
-            p[4] = start;
-            startList.add(p);
-            for (int i = 0; i < rows * cols - 1 - movesCount; i++) {
+            initPath(board, start);
+            for (int i = 0; i < rows * cols - 1 - madeMoves; i++) {
+                if (isCanceled) return -1;
                 Collections.shuffle(startList);
                 startList = startList.stream().unordered().limit(limit).parallel().map(this::proceedBoard)
-                        .flatMap(Collection::stream).collect(Collectors.toList());
+                      .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
                 if (startList.isEmpty()) break;
+                moveCount++;
             }
             iteration++;
-
         }
-        countPosition = startList.size();
-        if (countPosition>0) {
+        initHints((int) start, madeMoves, startList);
+        return startList.size();
+    }
+
+    private void initHints(int start, int movesCount, List<long[]> startList) {
+        if (!startList.isEmpty()) {
             int moves = rows * cols - 1 - movesCount;
-            hintPosition = getMovePosition(readLong(startList.get(0)[0], moves)[0],(int) start);
+            hintsPaths =  startList.stream().map(p->readPath(p, moves)).collect(toList());
+            hintsMoves = hintsPaths.stream().map(p -> p[0]).distinct().map(m -> getMovePosition(m, start)).collect(toList());
+            hintPosition = getMovePosition(readPath(startList.get(0), moves)[0], start);
         }
-
-        return countPosition;
     }
 
     public byte getHint() {
         return hintPosition;
     }
+
+    public List<byte[]> getHintsPaths() {
+        return hintsPaths;
+    }
+
+    public List<Byte> getHintsMoves() {
+        return hintsMoves;
+    }
+
 
     private List<long[]> proceedBoard(long[] path) {
         int last = (int) path[4];
@@ -199,7 +234,7 @@ public class HorsePuzzle {
         byte movePosition = 0;
         long avail = ~board & mask;
 
-        while (avail != 0 && movePosition!=64) {
+        while (avail != 0 && movePosition != 64) {
             int countOfZeros = Long.numberOfTrailingZeros(avail);
             movePosition += countOfZeros;
             avail = avail >> (countOfZeros + 1);
@@ -256,8 +291,7 @@ public class HorsePuzzle {
     }
 
     public long[] writeMove(byte move, long[] path) {
-        int mCount = Long.bitCount(path[3] - 1);
-        int partNumber = mCount / 21;
+        int partNumber = moveCount / 21;
         path[partNumber] = writeMove(move, path[partNumber]);
         return path;
     }
@@ -280,17 +314,17 @@ public class HorsePuzzle {
         return result;
     }
 
-    public byte[] readPath(long[] path) {
-        byte[] result = new byte[moveCount];
-        if (moveCount <= 21) {
-            return readLong(path[0], moveCount);
-        } else if (moveCount <= 42) {
+    public byte[] readPath(long[] path, int readMoveCount) {
+        byte[] result = new byte[readMoveCount];
+        if (readMoveCount <= 21) {
+            return readLong(path[0], readMoveCount);
+        } else if (readMoveCount <= 42) {
             System.arraycopy(readLong(path[0]), 0, result, 0, 21);
-            System.arraycopy(readLong(path[1], moveCount - 21), 0, result, 21, moveCount - 21);
+            System.arraycopy(readLong(path[1], readMoveCount - 21), 0, result, 21, readMoveCount - 21);
         } else {
             System.arraycopy(readLong(path[0]), 0, result, 0, 21);
             System.arraycopy(readLong(path[1]), 0, result, 21, 21);
-            System.arraycopy(readLong(path[2], moveCount - 42), 0, result, 42, moveCount - 42);
+            System.arraycopy(readLong(path[2], readMoveCount - 42), 0, result, 42, readMoveCount - 42);
         }
         return result;
     }
@@ -372,7 +406,7 @@ public class HorsePuzzle {
         board = setBit(board, (byte) start);
         int fromPosition = start;
 
-        for (byte move : readPath(path)) {
+        for (byte move : readPath(path, 0)) {
             byte movePosition = getMovePosition(move, fromPosition);
             board = setBit(board, movePosition);
             fromPosition = movePosition;
@@ -381,7 +415,7 @@ public class HorsePuzzle {
         return new long[]{board, fromPosition};
     }
 
-    private byte getMovePosition(byte move, int fromPosition) {
+    public byte getMovePosition(byte move, int fromPosition) {
         int[] m = moveOffset[move];
         int posRow = (fromPosition / cols);
         int posCol = fromPosition - posRow * cols;

@@ -24,16 +24,21 @@ import ru.dmitrochenko.horsePuzzle.model.BoardSettingsData
 import ru.dmitrochenko.horsePuzzle.model.CheckBoardModel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.stream.Collectors
 
 
 class CheckBoard : AppCompatActivity() {
     private var executor: ExecutorService = Executors.newSingleThreadExecutor()
     private val handler = Handler(Looper.getMainLooper())
+    private val boardModel: CheckBoardModel by lazy {
+        ViewModelProvider(this).get(CheckBoardModel::class.java)
+    }
 
     private var blackColor = 0
     private var whiteColor = 0
     private var orangeColor = 0
     private var hintField = -1
+    private var excCount = 0
     private var hintMove = false;
 
     private lateinit var grid: GridLayout
@@ -42,12 +47,6 @@ class CheckBoard : AppCompatActivity() {
     private lateinit var backBtn: Button
     private lateinit var forwardBtn: Button
     private lateinit var hintBtn: Button
-
-    private var excCount = 0
-
-    private val boardModel: CheckBoardModel by lazy {
-        ViewModelProvider(this).get(CheckBoardModel::class.java)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,22 +117,17 @@ class CheckBoard : AppCompatActivity() {
             hintBtn.text = getHintText()
         }
 
-        hintField = boardModel.getHint().toInt()
-        if (hintField != -1) {
+        val hintsPositions = boardModel.getHintsPositions()
+        if (hintsPositions.isNotEmpty()) {
+            hintField = hintsPositions.random().toInt()
             (grid.getChildAt(hintField) as Field).mark()
         }
 
-        if (boardModel.hints == 0) {
-            hintBtn.isEnabled = false
-        }
+        hintBtn.isEnabled = false
     }
 
     private fun getHintText(): String {
-        return if (boardModel.hints == 13) {
-            getString(R.string.hint)
-        } else {
-            getString(R.string.hint) + "(${boardModel.hints})"
-        }
+        return if (boardModel.hints == 13)  getString(R.string.hint) else getString(R.string.hint) + "(${boardModel.hints})"
     }
 
     private fun fieldClick(): (v: View) -> Unit = {
@@ -147,7 +141,7 @@ class CheckBoard : AppCompatActivity() {
     }
 
     private fun makeMove(position: Int) {
-        hintMove = position == hintField
+        hintMove = boardModel.getHintsPositions().contains(position.toByte())
         setHorse(boardModel.getCurrentPosition())
         boardModel.makeMove(position)
         setActiveHorse(position)
@@ -155,6 +149,7 @@ class CheckBoard : AppCompatActivity() {
 
     private fun moveForward() {
         if (!boardModel.stayOnLast()) {
+            hintMove = false
             setHorse(boardModel.getCurrentPosition())
             boardModel.moveForward()
             setActiveHorse(boardModel.getCurrentPosition())
@@ -163,6 +158,7 @@ class CheckBoard : AppCompatActivity() {
 
     private fun moveBack() {
         if (boardModel.currentIndex > 0) {
+            hintMove = false
             unSetHorse(boardModel.getCurrentPosition())
             boardModel.moveBack()
             setActiveHorse(boardModel.getCurrentPosition())
@@ -219,44 +215,50 @@ class CheckBoard : AppCompatActivity() {
 
         val full = boardModel.getCountOfRemainingMoves() < 30
 
+        if (hintMove && !full) {
+            availText.text = getString(R.string.available_combination) + temp() + " fH"
+            hintBtn.isEnabled = boardModel.hints > 0
+            return
+        }
+
         if (!full && (!boardModel.checkBoard() || boardModel.getAvailablePositions().isEmpty())) {
             availText.text = getString(R.string.no_combination)
             return
         }
 
+        boardModel.cancelCalculate();
         executor.execute {
-            excCount++
-            val count = if (full) boardModel.fullCalculate() else boardModel.limitCalculate()
+//            val count = if (full) boardModel.fullCalculate() else boardModel.limitCalculate()
+            val count = boardModel.getCombinations();
             handler.post {
-                if (excCount == 1) {
-                    postCombination(count, full)
-                }
-                excCount--
+                if (count >= 0) postCombination(count, full)
             }
         }
     }
 
     private fun postCombination(count: Long, full: Boolean) {
-        if (count == 0L && !hintMove) {
-            availText.text =
-                if (full) getString(R.string.no_combination) else getString(R.string.maybe_not)
+        if (count == 0L) {
+            availText.text =  if (full) getString(R.string.no_combination) else getString(R.string.maybe_not)
         } else {
             hintBtn.isEnabled = boardModel.hints > 0
             if (boardModel.hints == 13) {
-                availText.text =
-                    if (full) getString(R.string.full_avail_combination, count.toString()) else
+                availText.text = if (full) getString(R.string.full_avail_combination, count.toString()) else
                         getString(R.string.available_combination_count, count.toString())
             } else {
-                availText.text =
-                    getString(R.string.available_combination) + boardModel.getHint().toString()
+                availText.text =getString(R.string.available_combination) + temp()
             }
         }
+    }
+
+    private fun temp(): String {
+       return boardModel.getHintsPositions().stream().map { p->boardModel.getFieldNameById(p.toInt()) }.collect(Collectors.joining(" "))
     }
 
     private fun setActiveHorse(position: Int) {
         unMarkField(hintField)
         hintField = -1;
         (grid.getChildAt(position) as Field).setActiveHorse()
+
         if (boardModel.getCountOfRemainingMoves() == 0) {
             hintBtn.isEnabled = false;
         } else {
@@ -273,7 +275,7 @@ class CheckBoard : AppCompatActivity() {
     }
 
     private fun unMarkField(position: Int) {
-        if (position<0) return
+        if (position < 0) return
         (grid.getChildAt(position) as Field).unMark()
     }
 
