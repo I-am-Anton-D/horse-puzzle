@@ -10,10 +10,10 @@ class CheckBoardModel : ViewModel() {
     var finishOnStart = false
     var noHints = false
 
-    var board = 0L
     var currentIndex = -1
     var moves = mutableListOf<Int>()
 
+    private var board = 0L
     private var hintPositions = mutableListOf<Byte>()
     private var hintsPaths = mutableListOf<ByteArray>()
 
@@ -115,7 +115,7 @@ class CheckBoardModel : ViewModel() {
     }
 
     fun cancelCalculate() {
-        puzzle.cancelCalculate();
+        puzzle.cancelCalculate()
     }
 
     fun getCombinations(): Long {
@@ -131,7 +131,7 @@ class CheckBoardModel : ViewModel() {
     fun canReachStart(): Boolean {
         val availablePosition = puzzle.getAvailablePosition(0L, moves[0])
         if (getCurrentPosition().toByte() in availablePosition) {
-            return true;
+            return true
         }
         return false
     }

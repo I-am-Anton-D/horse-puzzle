@@ -38,9 +38,9 @@ class CheckBoard : AppCompatActivity() {
     private var blackColor = 0
     private var whiteColor = 0
     private var orangeColor = 0
-    private var yellowColor = 0;
+    private var yellowColor = 0
     private var hintField = -1
-    private var hintMove = false;
+    private var hintMove = false
 
     private lateinit var grid: GridLayout
     private lateinit var path: TextView
@@ -225,9 +225,9 @@ class CheckBoard : AppCompatActivity() {
             return
         }
 
-        boardModel.cancelCalculate();
+        boardModel.cancelCalculate()
         executor.execute {
-            val count = boardModel.getCombinations();
+            val count = boardModel.getCombinations()
             handler.post {
                 if (count >= 0) postCombination(count, full)
             }
@@ -249,11 +249,11 @@ class CheckBoard : AppCompatActivity() {
 
     private fun setActiveHorse(position: Int) {
         unMarkField(hintField)
-        hintField = -1;
+        hintField = -1
         (grid.getChildAt(position) as Field).setActiveHorse()
 
         if (boardModel.getCountOfRemainingMoves() == 0) {
-            hintBtn.isEnabled = false;
+            hintBtn.isEnabled = false
             if (boardModel.finishOnStart) {
                 if (boardModel.canReachStart()) {
                     Toast.makeText(applicationContext, "You win RS", Toast.LENGTH_SHORT).show()

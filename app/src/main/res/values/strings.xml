@@ -26,10 +26,8 @@
     <string name="bad_settings">With this setting no result, but you can try</string>
     <string name="tryw">Try</string>
     <string name="available_combination">Combination exist</string>
-    <string name="available_combination_count">Minimum combination count: %1$s</string>
     <string name="maybe_not">Maybe combination not exist</string>
     <string name="no_combination">Combination NOT exist</string>
     <string name="calculate">Calculate…</string>
-    <string name="full_avail_combination">Count of available combination: %1$s</string>
     <string name="need_to_reach_start_field">Need to reach start field</string>
 </resources>

@@ -2,7 +2,6 @@ package ru.dmitrochenko.horsePuzzle.puzzle;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -10,22 +9,22 @@ public class HorsePuzzle {
     final int cols;
     final int rows;
     final int start;
-    public int moveCount = 0;
     final int shift;
-    public int countPosition;
-    private byte hintPosition;
-    private boolean isCanceled = false;
+
+    long[] maskMap;
+    byte[][][] moveMap;
+    byte[] moveByDiff;
+
+    private int moveCount;
+    private boolean isCanceled;
+
     private List<byte[]> hintsPaths = new ArrayList<>();
     private List<Byte> hintsMoves = new ArrayList<>();
     private List<long[]> startList = new ArrayList<>();
 
-
     static final int[][] moveOffset = new int[][]
             {{+1, +2}, {-1, +2}, {-2, +1}, {-2, -1}, {-1, -2}, {+1, -2}, {+2, -1}, {+2, +1}};
-           //    0          1         2        3         4          5          6        7
-    long[] maskMap;
-    byte[][][] moveMap;
-    byte[] moveByDiff;
+    //    0          1         2        3         4          5          6        7
 
     public HorsePuzzle(int rows, int cols, int start) {
         this.cols = cols;
@@ -66,8 +65,8 @@ public class HorsePuzzle {
                 movePositionArr[moveNumber] = movePosition;
             }
             long mask = 0;
-            for (long movePosition : movePositionArr) {
-                mask = setBit(mask, (byte) movePosition);
+            for (byte movePosition : movePositionArr) {
+                mask = setBit(mask, movePosition);
             }
 
             byte[] allPosition = new byte[8];
@@ -86,87 +85,8 @@ public class HorsePuzzle {
         isCanceled = true;
     }
 
-    public void calculateByParts() {
-        List<long[]> parts = new ArrayList<>();
-        long[] p = new long[5];
-        long startBoard = 0;
-        startBoard = setBit(startBoard, (byte) start);
-        p[3] = startBoard;
-        p[4] = start;
-        parts.add(p);
-        while (parts.size() < 10000000) {
-            parts = parts.stream().map(this::proceedBoard)
-                    .flatMap(Collection::stream).collect(toList());
-            moveCount++;
-            if (parts.isEmpty()) break;
-        }
-        System.out.println("Total Parts = " + parts.size());
-        int total = 0;
-        int rmoves = moveCount;
-        int s = 1;
-        for (long[] part : parts) {
-            List<long[]> start = new ArrayList<>();
-            start.add(part);
-            for (int i = 0; i < rows * cols - 1 - rmoves; i++) {
-                start = start.stream().unordered().parallel().map(this::proceedBoard)
-                        .collect(ArrayList::new, List::addAll, List::addAll);
-                moveCount++;
-                if (start.isEmpty()) break;
-            }
-            total = total + start.size();
-            System.out.println("Part = " + s + "(" + parts.size() + ") Found = " + start.size() + " Total = " + total);
-            s++;
-
-            moveCount = rmoves;
-        }
-        System.out.println("Total = " + total);
-    }
-
-    public void calculate() {
-
-        long[] p = new long[5];
-        p[3] = setBit(0L, (byte) start);
-        p[4] = start;
-
-        List<long[]> startList = new ArrayList<>();
-        startList.add(p);
-
-        for (int i = 0; i < (rows * cols) - 1; i++) {
-            startList = startList.stream().unordered().parallel().map(this::proceedBoard)
-                    .flatMap(Collection::stream).collect(toList());
-            System.out.println("Move = " + (i + 1) + " Boards = " + startList.size());
-            if (startList.isEmpty()) break;
-        }
-
-        System.out.println("Found = " + startList.size() + " Time = ");
-    }
-
-    public long calculatePosition(long board, long start, int movesCount) {
-        hintPosition = -1;
-        long[] p = new long[5];
-        p[3] = board;
-        p[4] = start;
-
-        List<long[]> startList = new ArrayList<>();
-        startList.add(p);
-
-        for (int i = 0; i < rows * cols - 1 - movesCount; i++) {
-            startList = startList.stream().unordered().parallel().map(this::proceedBoard)
-                    .flatMap(Collection::stream).collect(toList());
-            if (startList.isEmpty()) break;
-        }
-
-        countPosition = startList.size();
-        if (countPosition > 0) {
-            int moves = rows * cols - 1 - movesCount;
-            //hintPosition = getMovePosition(readPath(startList.get(0))[0], (int) start);
-        }
-        return countPosition;
-    }
-
     private int initCalculate(int limit) {
         isCanceled = false;
-        hintPosition = -1;
         hintsMoves.clear();
         hintsPaths.clear();
         startList.clear();
@@ -189,7 +109,7 @@ public class HorsePuzzle {
                 if (isCanceled) return -1;
                 Collections.shuffle(startList);
                 startList = startList.stream().unordered().limit(limit).parallel().map(this::proceedBoard)
-                      .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
+                        .collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
                 if (startList.isEmpty()) break;
                 moveCount++;
             }
@@ -217,14 +137,9 @@ public class HorsePuzzle {
     private void initHints(int from, int movesCount, List<long[]> startList) {
         if (!startList.isEmpty()) {
             int moves = rows * cols - 1 - movesCount;
-            hintsPaths =  startList.stream().map(p->readPath(p, moves)).collect(toList());
+            hintsPaths = startList.stream().map(p -> readPath(p, moves)).collect(toList());
             hintsMoves = hintsPaths.stream().map(p -> p[0]).distinct().map(m -> getMovePosition(m, from)).collect(toList());
-            hintPosition = getMovePosition(readPath(startList.get(0), moves)[0], from);
         }
-    }
-
-    public byte getHint() {
-        return hintPosition;
     }
 
     public List<byte[]> getHintsPaths() {
@@ -234,7 +149,6 @@ public class HorsePuzzle {
     public List<Byte> getHintsMoves() {
         return hintsMoves;
     }
-
 
     private List<long[]> proceedBoard(long[] path) {
         int last = (int) path[4];
@@ -305,10 +219,9 @@ public class HorsePuzzle {
         return true;
     }
 
-    public long[] writeMove(byte move, long[] path) {
+    public void writeMove(byte move, long[] path) {
         int partNumber = moveCount / 21;
         path[partNumber] = writeMove(move, path[partNumber]);
-        return path;
     }
 
     public long writeMove(byte move, long path) {
@@ -416,20 +329,6 @@ public class HorsePuzzle {
         return board;
     }
 
-    public long[] convertToBoard(long[] path) {
-        long board = 0;
-        board = setBit(board, (byte) start);
-        int fromPosition = start;
-
-        for (byte move : readPath(path, 0)) {
-            byte movePosition = getMovePosition(move, fromPosition);
-            board = setBit(board, movePosition);
-            fromPosition = movePosition;
-        }
-
-        return new long[]{board, fromPosition};
-    }
-
     public byte getMovePosition(byte move, int fromPosition) {
         int[] m = moveOffset[move];
         int posRow = (fromPosition / cols);
@@ -439,65 +338,7 @@ public class HorsePuzzle {
         return (byte) (moveRow * cols + moveCol);
     }
 
-    public int getMoveCount() {
-        return moveCount;
-    }
-
     public boolean isFill(long board, int position) {
         return board << ~position < 0;
     }
-
-    public void drawInConsole(long board, byte last) {
-        drawTop(cols);
-        for (int i = rows; i >= 1; i--) {
-            drawMiddle(i, cols, board, last);
-            if (i != 1) {
-                drawSeparate(cols);
-            } else {
-                drawBottom(cols);
-            }
-        }
-    }
-
-    private void drawBottom(int columnsCount) {
-        System.out.print("└─────┴");
-        for (int i = 1; i < columnsCount - 1; i++) {
-            System.out.print("─────┴");
-        }
-        System.out.println("─────┘");
-    }
-
-    private void drawSeparate(int columnsCount) {
-        System.out.print("├─────┼");
-        for (int i = 1; i < columnsCount - 1; i++) {
-            System.out.print("─────┼");
-        }
-        System.out.println("─────┤");
-    }
-
-    private void drawTop(int columnsCount) {
-        System.out.print("┌─────┬");
-        for (int i = 1; i < columnsCount - 1; i++) {
-            System.out.print("─────┬");
-        }
-        System.out.println("─────┐");
-    }
-
-    private void drawMiddle(int rowIndex, int cols, long board, int last) {
-        for (int i = 0; i < cols; i++) {
-            String out;
-            int index = rowIndex * cols + i - cols;
-            if (index == last) {
-                out = "|  H  ";
-            } else if (isFill(board, index)) {
-                out = "|  X  ";
-            } else {
-                out = "|     ";
-            }
-            System.out.print(out);
-        }
-        System.out.println("|");
-    }
 }
-
-
