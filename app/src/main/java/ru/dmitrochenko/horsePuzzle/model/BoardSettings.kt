@@ -8,7 +8,7 @@ data class BoardSettingsData(
     var rows: Int = 3,
     var cols: Int = 4,
     var hints: Int = 3,
-    var finishOnStart: Boolean = true
+    var finishOnStart: Boolean = false
 ) : Parcelable {
 
     fun selfCheck(): Boolean {

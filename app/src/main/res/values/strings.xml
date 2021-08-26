@@ -31,4 +31,5 @@
     <string name="no_combination">Combination NOT exist</string>
     <string name="calculate">Calculate…</string>
     <string name="full_avail_combination">Count of available combination: %1$s</string>
+    <string name="need_to_reach_start_field">Need to reach start field</string>
 </resources>

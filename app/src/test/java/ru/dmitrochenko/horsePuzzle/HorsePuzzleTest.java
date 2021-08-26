@@ -250,7 +250,7 @@ class HorsePuzzleTest {
     @RepeatedTest(10)
     void limit() {
         HorsePuzzle hp = new HorsePuzzle(8, 8, 0);
-        hp.calculateLimitPosition(0,0,0, -1);
+        hp.calculateLimitPosition(0,0,0, -1, false);
     }
 
 }

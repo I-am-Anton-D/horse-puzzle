@@ -14,10 +14,11 @@ class CheckBoardModel : ViewModel() {
     var currentIndex = -1
     var moves = mutableListOf<Int>()
 
-    private lateinit var availPosition: ByteArray
-    private lateinit var puzzle: HorsePuzzle
     private var hintPositions = mutableListOf<Byte>()
     private var hintsPaths = mutableListOf<ByteArray>()
+
+    private lateinit var availPosition: ByteArray
+    private lateinit var puzzle: HorsePuzzle
 
     fun applySettings(settings: BoardSettingsData) {
         rows = settings.rows
@@ -36,12 +37,16 @@ class CheckBoardModel : ViewModel() {
     }
 
     fun initAvailablePositions() {
-        availPosition = puzzle.getAvailablePosition(board, moves[currentIndex])
+        availPosition = puzzle.getAvailablePosition(board, getCurrentPosition())
     }
 
     fun setStartPosition(position: Int) {
         puzzle = HorsePuzzle(rows, cols, position)
         makeMove(position)
+    }
+
+    fun getCurrentPosition(): Int {
+        return moves[currentIndex]
     }
 
     fun makeMove(position: Int) {
@@ -59,13 +64,9 @@ class CheckBoardModel : ViewModel() {
         initAvailablePositions()
     }
 
-    fun getCurrentMovePosition() : Int {
-        return moves[currentIndex]
-    }
-
     private fun proceedHintsPath(position: Int) {
         hintsPaths = hintsPaths
-            .filter { p -> puzzle.getMovePosition(p[0], getCurrentMovePosition()) == position.toByte() }
+            .filter { p -> puzzle.getMovePosition(p[0], getCurrentPosition()) == position.toByte() }
             .map { p -> p.copyOfRange(1, p.size) }
             .toMutableList()
         hintPositions = hintsPaths.map { p -> puzzle.getMovePosition(p[0], position) }.distinct().toMutableList()
@@ -73,7 +74,7 @@ class CheckBoardModel : ViewModel() {
 
     fun moveBack() {
         if (currentIndex > 0) {
-            board = puzzle.unSetBit(board, moves[currentIndex])
+            board = puzzle.unSetBit(board, getCurrentPosition())
             currentIndex--
             hintPositions.clear()
             hintsPaths.clear()
@@ -84,7 +85,7 @@ class CheckBoardModel : ViewModel() {
     fun moveForward() {
         if (!stayOnLast()) {
             currentIndex++
-            board = puzzle.setBit(board, moves[currentIndex].toByte())
+            board = puzzle.setBit(board,  getCurrentPosition().toByte())
             hintPositions.clear()
             hintsPaths.clear()
             initAvailablePositions()
@@ -93,10 +94,6 @@ class CheckBoardModel : ViewModel() {
 
     fun stayOnLast(): Boolean {
         return currentIndex == moves.size - 1
-    }
-
-    fun getCurrentPosition(): Int {
-        return moves[currentIndex]
     }
 
     fun getFieldNameById(id: Int): String {
@@ -123,10 +120,20 @@ class CheckBoardModel : ViewModel() {
 
     fun getCombinations(): Long {
         val limit = if (getCountOfRemainingMoves() < 32) Int.MAX_VALUE else 15000
-        val count = puzzle.calculateLimitPosition(board, getCurrentPosition().toLong(), moves.subList(0, currentIndex).size, limit)
+        val madeMoves = moves.subList(0, currentIndex).size
+        val from = getCurrentPosition()
+        val count = puzzle.calculateLimitPosition(board, from, madeMoves, limit, finishOnStart)
         hintPositions = puzzle.hintsMoves
         hintsPaths = puzzle.hintsPaths
         return count
+    }
+
+    fun canReachStart(): Boolean {
+        val availablePosition = puzzle.getAvailablePosition(0L, moves[0])
+        if (getCurrentPosition().toByte() in availablePosition) {
+            return true;
+        }
+        return false
     }
 
     companion object {

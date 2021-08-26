@@ -181,10 +181,10 @@ public class HorsePuzzle {
         moveCount = 0;
     }
 
-    public long calculateLimitPosition(long board, long start, int madeMoves, int limit) {
+    public long calculateLimitPosition(long board, int from, int madeMoves, int limit, boolean finisOnStart) {
         int iteration = initCalculate(limit);
         while (startList.isEmpty() && iteration != 3) {
-            initPath(board, start);
+            initPath(board, from);
             for (int i = 0; i < rows * cols - 1 - madeMoves; i++) {
                 if (isCanceled) return -1;
                 Collections.shuffle(startList);
@@ -195,16 +195,31 @@ public class HorsePuzzle {
             }
             iteration++;
         }
-        initHints((int) start, madeMoves, startList);
+        if (finisOnStart) {
+            startList = startList.stream().filter(this::canReachStart).collect(toList());
+        }
+        initHints(from, madeMoves, startList);
         return startList.size();
     }
 
-    private void initHints(int start, int movesCount, List<long[]> startList) {
+    private boolean canReachStart(long[] p) {
+        long last = p[4];
+        byte[] availFromStart = getAvailablePosition(0L, start);
+        for (byte b : availFromStart) {
+            if (b == (byte) last) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private void initHints(int from, int movesCount, List<long[]> startList) {
         if (!startList.isEmpty()) {
             int moves = rows * cols - 1 - movesCount;
             hintsPaths =  startList.stream().map(p->readPath(p, moves)).collect(toList());
-            hintsMoves = hintsPaths.stream().map(p -> p[0]).distinct().map(m -> getMovePosition(m, start)).collect(toList());
-            hintPosition = getMovePosition(readPath(startList.get(0), moves)[0], start);
+            hintsMoves = hintsPaths.stream().map(p -> p[0]).distinct().map(m -> getMovePosition(m, from)).collect(toList());
+            hintPosition = getMovePosition(readPath(startList.get(0), moves)[0], from);
         }
     }
 

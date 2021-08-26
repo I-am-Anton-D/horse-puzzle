@@ -13,6 +13,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.color
@@ -37,8 +38,8 @@ class CheckBoard : AppCompatActivity() {
     private var blackColor = 0
     private var whiteColor = 0
     private var orangeColor = 0
+    private var yellowColor = 0;
     private var hintField = -1
-    private var excCount = 0
     private var hintMove = false;
 
     private lateinit var grid: GridLayout
@@ -63,6 +64,7 @@ class CheckBoard : AppCompatActivity() {
         blackColor = ContextCompat.getColor(applicationContext, R.color.grey)
         whiteColor = ContextCompat.getColor(applicationContext, R.color.white)
         orangeColor = ContextCompat.getColor(applicationContext, R.color.orange)
+        yellowColor = ContextCompat.getColor(applicationContext, R.color.yellow)
     }
 
     private fun initSettings() {
@@ -109,6 +111,7 @@ class CheckBoard : AppCompatActivity() {
         }
         hintBtn = findViewById(R.id.hintBtn)
         hintBtn.text = getHintText()
+        hintBtn.setOnClickListener { hintClick() }
     }
 
     private fun hintClick() {
@@ -120,14 +123,14 @@ class CheckBoard : AppCompatActivity() {
         val hintsPositions = boardModel.getHintsPositions()
         if (hintsPositions.isNotEmpty()) {
             hintField = hintsPositions.random().toInt()
-            (grid.getChildAt(hintField) as Field).mark()
+            markField(hintField)
         }
 
         hintBtn.isEnabled = false
     }
 
     private fun getHintText(): String {
-        return if (boardModel.hints == 13)  getString(R.string.hint) else getString(R.string.hint) + "(${boardModel.hints})"
+        return if (boardModel.hints == 13) getString(R.string.hint) else getString(R.string.hint) + "(${boardModel.hints})"
     }
 
     private fun fieldClick(): (v: View) -> Unit = {
@@ -200,12 +203,10 @@ class CheckBoard : AppCompatActivity() {
         boardModel.setStartPosition(position)
         val chooser: TextView = findViewById(R.id.chooseStartField)
         chooser.visibility = GONE
-
-        if (boardModel.hints != 0) {
-            hintBtn.isEnabled = true
-            hintBtn.setOnClickListener { hintClick() }
-        }
         availText.visibility = VISIBLE
+        if (boardModel.finishOnStart) {
+            (grid.getChildAt(position) as Field).fieldColor = yellowColor
+        }
         setActiveHorse(position)
     }
 
@@ -214,21 +215,18 @@ class CheckBoard : AppCompatActivity() {
         hintBtn.isEnabled = false
 
         val full = boardModel.getCountOfRemainingMoves() < 30
-
-        if (hintMove && !full) {
-            availText.text = getString(R.string.available_combination) + temp() + " fH"
-            hintBtn.isEnabled = boardModel.hints > 0
+        if (hintMove) {
+            postCombination(1, true)
             return
         }
 
         if (!full && (!boardModel.checkBoard() || boardModel.getAvailablePositions().isEmpty())) {
-            availText.text = getString(R.string.no_combination)
+            postCombination(0, true)
             return
         }
 
         boardModel.cancelCalculate();
         executor.execute {
-//            val count = if (full) boardModel.fullCalculate() else boardModel.limitCalculate()
             val count = boardModel.getCombinations();
             handler.post {
                 if (count >= 0) postCombination(count, full)
@@ -238,20 +236,15 @@ class CheckBoard : AppCompatActivity() {
 
     private fun postCombination(count: Long, full: Boolean) {
         if (count == 0L) {
-            availText.text =  if (full) getString(R.string.no_combination) else getString(R.string.maybe_not)
+            availText.text = if (full) getString(R.string.no_combination) else getString(R.string.maybe_not)
         } else {
             hintBtn.isEnabled = boardModel.hints > 0
-            if (boardModel.hints == 13) {
-                availText.text = if (full) getString(R.string.full_avail_combination, count.toString()) else
-                        getString(R.string.available_combination_count, count.toString())
-            } else {
-                availText.text =getString(R.string.available_combination) + temp()
-            }
+            availText.text = getString(R.string.available_combination) + temp()
         }
     }
 
     private fun temp(): String {
-       return boardModel.getHintsPositions().stream().map { p->boardModel.getFieldNameById(p.toInt()) }.collect(Collectors.joining(" "))
+        return boardModel.getHintsPositions().stream().map { p -> boardModel.getFieldNameById(p.toInt()) }.collect(Collectors.joining(" "))
     }
 
     private fun setActiveHorse(position: Int) {
@@ -261,6 +254,15 @@ class CheckBoard : AppCompatActivity() {
 
         if (boardModel.getCountOfRemainingMoves() == 0) {
             hintBtn.isEnabled = false;
+            if (boardModel.finishOnStart) {
+                if (boardModel.canReachStart()) {
+                    Toast.makeText(applicationContext, "You win RS", Toast.LENGTH_SHORT).show()
+                } else {
+                    availText.text = getString(R.string.need_to_reach_start_field)
+                }
+            } else {
+                Toast.makeText(applicationContext, "You win MC", Toast.LENGTH_SHORT).show()
+            }
         } else {
             showPath()
         }
@@ -278,6 +280,12 @@ class CheckBoard : AppCompatActivity() {
         if (position < 0) return
         (grid.getChildAt(position) as Field).unMark()
     }
+
+    private fun markField(position: Int) {
+        if (position < 0) return
+        (grid.getChildAt(position) as Field).mark()
+    }
+
 
     private fun getNewButton(index: Int, row: Int, col: Int): Button {
         val cellDim = calculateCellDim()
