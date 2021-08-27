@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.text.SpannableStringBuilder
 import android.view.Gravity
 import android.view.View
@@ -17,12 +18,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.color
+import androidx.core.view.forEach
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import ru.dmitrochenko.horsePuzzle.R
 import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmStartFieldDialog
+import ru.dmitrochenko.horsePuzzle.activity.dialog.WinDialog
 import ru.dmitrochenko.horsePuzzle.activity.view.Field
 import ru.dmitrochenko.horsePuzzle.model.BoardSettingsData
 import ru.dmitrochenko.horsePuzzle.model.CheckBoardModel
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.stream.Collectors
@@ -173,7 +178,7 @@ class CheckBoard : AppCompatActivity() {
             .color(orangeColor) { append(getPathActiveText()) }
             .color(blackColor) { append(getPathForwardText()) }
         path.text = pathText
-        if (!boardModel.noHints) {
+        if (!boardModel.noHints && boardModel.getCountOfRemainingMoves() != 0) {
             getCombination()
         }
     }
@@ -214,7 +219,7 @@ class CheckBoard : AppCompatActivity() {
         availText.text = getString(R.string.calculate)
         hintBtn.isEnabled = false
 
-        val full = boardModel.getCountOfRemainingMoves() < 30
+        val full = boardModel.getCountOfRemainingMoves() < 32
         if (hintMove) {
             postCombination(1, true)
             return
@@ -256,16 +261,16 @@ class CheckBoard : AppCompatActivity() {
             hintBtn.isEnabled = false
             if (boardModel.finishOnStart) {
                 if (boardModel.canReachStart()) {
-                    Toast.makeText(applicationContext, "You win RS", Toast.LENGTH_SHORT).show()
+                    openWinDialog()
                 } else {
                     availText.text = getString(R.string.need_to_reach_start_field)
                 }
             } else {
-                Toast.makeText(applicationContext, "You win MC", Toast.LENGTH_SHORT).show()
+                openWinDialog()
             }
-        } else {
-            showPath()
         }
+
+        showPath()
     }
 
     private fun setHorse(position: Int) {
@@ -285,7 +290,6 @@ class CheckBoard : AppCompatActivity() {
         if (position < 0) return
         (grid.getChildAt(position) as Field).mark()
     }
-
 
     private fun getNewButton(index: Int, row: Int, col: Int): Button {
         val cellDim = calculateCellDim()
@@ -318,6 +322,7 @@ class CheckBoard : AppCompatActivity() {
         }
     }
 
+
     private fun calculateCellDim(): Int {
         val screen = findViewById<View>(R.id.boardScreen)
         val width = screen.width
@@ -329,12 +334,38 @@ class CheckBoard : AppCompatActivity() {
         }
     }
 
+    private fun openWinDialog() {
+        availText.text = ""
+        val winDialog = WinDialog()
+        winDialog.show(supportFragmentManager, "winDialog")
+    }
+
     private fun openConfirmStartFieldDialog(it: View) {
+        var combinationExist = true
+        if (boardModel.hints != 0) {
+            combinationExist = boardModel.checkFirstField(it.id)
+        }
+
         val confirmDialog = ConfirmStartFieldDialog()
         confirmDialog.arguments = Bundle().apply {
             putString("FIELD_NAME", boardModel.getFieldNameById(it.id))
             putInt("FIELD_ID", it.id)
+            putBoolean("COMBINATION_EXIST", combinationExist)
         }
         confirmDialog.show(supportFragmentManager, "confirmStartFieldDialog")
+    }
+
+    fun showWinPath() {
+        backBtn.isEnabled = false
+        forwardBtn.isEnabled = false
+        grid.forEach { (it as Field).unSetHorse() }
+
+        for (m in boardModel.moves) {
+            (grid.getChildAt(m) as Field).setHorse()
+            SystemClock.sleep(500)
+        }
+
+        backBtn.isEnabled = true
+        forwardBtn.isEnabled = true
     }
 }

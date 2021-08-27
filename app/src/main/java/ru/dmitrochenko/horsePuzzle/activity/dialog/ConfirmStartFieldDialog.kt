@@ -14,15 +14,16 @@ class ConfirmStartFieldDialog : DialogFragment() {
             val builder = AlertDialog.Builder(it)
             val fieldName = arguments?.getString("FIELD_NAME") ?: throw IllegalArgumentException("FIELD_NAME not set")
             val fieldId = arguments?.getInt("FIELD_ID") ?: throw IllegalArgumentException("FIELD_ID not set")
-
+            val combinationExist = arguments?.getBoolean("COMBINATION_EXIST") ?: throw IllegalArgumentException("COMBINATION_EXIST not set")
             builder.setTitle(getString(R.string.confirm_start_field))
-                .setMessage(getString(R.string.choose_msg, fieldName))
+                .setMessage(if (combinationExist) getString(R.string.choose_msg, fieldName) else getString(R.string.no_combintaion_from_start_field))
                 .setCancelable(true)
-                .setPositiveButton(getString(R.string.correct)) { _, _ ->
+                .setPositiveButton(if (combinationExist) getString(R.string.correct) else getString(R.string.tryw)) { _, _ ->
                     (activity as CheckBoard).setStartField(fieldId)
                 }
-                .setNegativeButton(getString(R.string.cancel)
-                ) { _, _ ->}
+                .setNegativeButton(
+                    getString(R.string.cancel)
+                ) { _, _ -> }
             builder.create()
 
         } ?: throw IllegalStateException("Activity cannot be null")

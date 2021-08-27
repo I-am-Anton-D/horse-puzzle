@@ -85,7 +85,7 @@ class CheckBoardModel : ViewModel() {
     fun moveForward() {
         if (!stayOnLast()) {
             currentIndex++
-            board = puzzle.setBit(board,  getCurrentPosition().toByte())
+            board = puzzle.setBit(board, getCurrentPosition().toByte())
             hintPositions.clear()
             hintsPaths.clear()
             initAvailablePositions()
@@ -134,6 +134,15 @@ class CheckBoardModel : ViewModel() {
             return true
         }
         return false
+    }
+
+    fun checkFirstField(position: Int): Boolean {
+        if (rows * cols <= 28) {
+            val testPuzzle = HorsePuzzle(rows, cols, position)
+            val testBoard: Long = testPuzzle.setBit(board, position.toByte());
+            return testPuzzle.calculateLimitPosition(testBoard, position, 0, Int.MAX_VALUE, false) > 0
+        }
+        return true
     }
 
     companion object {
