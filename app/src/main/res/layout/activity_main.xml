@@ -4,69 +4,58 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="80dp"
     tools:context=".activity.MainActivity">
+
+    <FrameLayout
+        android:id="@+id/logo_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="300dp"
+            android:contentDescription="@string/main_image"
+            android:src="@drawable/chess_horse_active" />
+
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/continueGame"
+        style="@style/mainButtons"
+        android:text="@string/continueGame"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logo_container"
+        tools:visibility="visible" />
 
     <Button
         android:id="@+id/newGame"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="8dp"
+        style="@style/mainButtons"
         android:text="@string/new_game"
-        app:layout_constraintBottom_toTopOf="@+id/settings"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/continueGame" />
 
     <Button
         android:id="@+id/about"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="8dp"
+        style="@style/mainButtons"
         android:text="@string/about"
-        app:layout_constraintBottom_toTopOf="@+id/exit"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/settings"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/settings"
-        app:layout_constraintBottom_toTopOf="@+id/about"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <ImageView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="45dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="32dp"
-        android:contentDescription="@string/main_image"
-        android:scaleType="centerInside"
-        app:layout_constraintBottom_toTopOf="@+id/newGame"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/h3" />
+        app:layout_constraintTop_toBottomOf="@+id/newGame" />
 
     <Button
         android:id="@+id/exit"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="64dp"
+        style="@style/mainButtons"
         android:text="@string/exit"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/about" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

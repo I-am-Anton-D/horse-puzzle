@@ -8,11 +8,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.DayNight"
+        android:theme="@style/Theme.AppBaseTheme"
         android:fullBackupContent="@xml/backup_descriptor">
-        <activity android:name=".activity.CheckBoard" />
-        <activity android:name=".activity.BoardSettings" />
-        <activity android:name=".activity.MainActivity">
+        <activity android:name=".activity.CheckBoard" android:screenOrientation="portrait" />
+        <activity android:name=".activity.BoardSettings" android:screenOrientation="portrait" />
+        <activity android:name=".activity.MainActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

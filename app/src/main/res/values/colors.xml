@@ -5,4 +5,9 @@
     <color name="grey">#696969</color>
     <color name="orange">#EF6C00</color>
     <color name="yellow">#9E9D24</color>
+    <color name="lightBlue">#98ced9</color>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="whiteField">#eeeed2</color>
+    <color name="blackField">#769656</color>
+    <color name="buttonBackground">#85aa53</color>
 </resources>

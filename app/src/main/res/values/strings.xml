@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HorsePuzzle</string>
+    <string name="app_name">Horse Puzzle</string>
     <string name="new_game">New Game</string>
     <string name="about">About</string>
     <string name="settings">Settings</string>
@@ -34,4 +34,6 @@
     <string name="congratulation">Congratulation</string>
     <string name="you_win">You Win! Show you path?</string>
     <string name="showPath">Show</string>
+    <string name="continiue">Continue</string>
+    <string name="continueGame">Continue Game</string>
 </resources>

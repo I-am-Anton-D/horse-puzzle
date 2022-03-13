@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/drawable/chess_horse.xml" value="0.4465" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/drawable/chess_horse_active.xml" value="0.461" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/drawable/horse.xml" value="0.461" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/drawable/horse_active.xml" value="0.461" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/drawable/ic_launcher_background.xml" value="0.461" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.461" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/drawable/mainButtonBackground.xml" value="0.461" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/drawable/main_button_background.xml" value="0.461" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/layout/activity_board_settings.xml" value="0.4192708333333333" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/layout/activity_check_board.xml" value="0.5458333333333333" />
+        <entry key="..\:/andpjs/HorsePuzzle/app/src/main/res/layout/activity_main.xml" value="0.5598958333333334" />
+      </map>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>

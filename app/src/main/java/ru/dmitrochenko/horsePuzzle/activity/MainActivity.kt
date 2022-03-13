@@ -9,7 +9,6 @@ import ru.dmitrochenko.horsePuzzle.R
 
 class MainActivity : AppCompatActivity() {
     private lateinit var newGameBtn:Button
-    private lateinit var settingBtn:Button
     private lateinit var aboutBtn:Button
     private lateinit var exitBtn:Button
 
@@ -18,14 +17,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        supportActionBar?.hide()
+
         newGameBtn = findViewById(R.id.newGame)
-        settingBtn = findViewById(R.id.settings)
         aboutBtn = findViewById(R.id.about)
         exitBtn = findViewById(R.id.exit)
-
-        settingBtn.setOnClickListener{
-            Toast.makeText(this, "Setting button", Toast.LENGTH_SHORT).show()
-        }
 
         aboutBtn.setOnClickListener{
             Toast.makeText(this, "About button", Toast.LENGTH_SHORT).show()

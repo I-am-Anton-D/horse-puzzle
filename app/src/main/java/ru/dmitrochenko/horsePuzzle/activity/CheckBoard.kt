@@ -14,12 +14,10 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.color
 import androidx.core.view.forEach
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import ru.dmitrochenko.horsePuzzle.R
 import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmStartFieldDialog
@@ -27,7 +25,6 @@ import ru.dmitrochenko.horsePuzzle.activity.dialog.WinDialog
 import ru.dmitrochenko.horsePuzzle.activity.view.Field
 import ru.dmitrochenko.horsePuzzle.model.BoardSettingsData
 import ru.dmitrochenko.horsePuzzle.model.CheckBoardModel
-import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.stream.Collectors
@@ -44,6 +41,8 @@ class CheckBoard : AppCompatActivity() {
     private var whiteColor = 0
     private var orangeColor = 0
     private var yellowColor = 0
+    private var greyColor = 0
+
     private var hintField = -1
     private var hintMove = false
 
@@ -66,10 +65,11 @@ class CheckBoard : AppCompatActivity() {
     }
 
     private fun initColors() {
-        blackColor = ContextCompat.getColor(applicationContext, R.color.grey)
-        whiteColor = ContextCompat.getColor(applicationContext, R.color.white)
+        blackColor = ContextCompat.getColor(applicationContext, R.color.blackField)
+        whiteColor = ContextCompat.getColor(applicationContext, R.color.whiteField)
         orangeColor = ContextCompat.getColor(applicationContext, R.color.orange)
         yellowColor = ContextCompat.getColor(applicationContext, R.color.yellow)
+        greyColor = ContextCompat.getColor(applicationContext, R.color.grey)
     }
 
     private fun initSettings() {
@@ -176,7 +176,7 @@ class CheckBoard : AppCompatActivity() {
     private fun showPath() {
         val pathText = SpannableStringBuilder().append(getPathBackText())
             .color(orangeColor) { append(getPathActiveText()) }
-            .color(blackColor) { append(getPathForwardText()) }
+            .color(greyColor) { append(getPathForwardText()) }
         path.text = pathText
         if (!boardModel.noHints && boardModel.getCountOfRemainingMoves() != 0) {
             getCombination()
@@ -309,8 +309,8 @@ class CheckBoard : AppCompatActivity() {
             }
 
             markColor = orangeColor
-            horseDrw = R.drawable.ic_h3
-            horseActiveDrw = R.drawable.ic_h3_active
+            horseDrw = R.drawable.chess_horse
+            horseActiveDrw = R.drawable.chess_horse_active
 
             layoutParams = GridLayout.LayoutParams().apply {
                 rowSpec = GridLayout.spec(boardModel.rows - row - 1)
@@ -326,7 +326,7 @@ class CheckBoard : AppCompatActivity() {
     private fun calculateCellDim(): Int {
         val screen = findViewById<View>(R.id.boardScreen)
         val width = screen.width
-        val margin = (12 * Resources.getSystem().displayMetrics.density).toInt()
+        val margin = (0 * Resources.getSystem().displayMetrics.density).toInt()
         return if (boardModel.rows > boardModel.cols) {
             width / boardModel.rows
         } else {

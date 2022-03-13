@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.AppBaseTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="colorAccent">@color/buttonBackground</item>
+    </style>
+
+    <style name="mainButtons">
+        <item name="android:background">@drawable/main_button_background</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="elevation">5dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:layout_marginBottom">12dp</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:bottomRightRadius">8dp</item>
+        <item name="android:bottomLeftRadius">8dp</item>
+        <item name="android:topLeftRadius">8dp</item>
+        <item name="android:topRightRadius">8dp</item>
+    </style>
+
+    <style name="SeekBarColor"
+        parent="Widget.AppCompat.SeekBar">
+
+    </style>
+</resources>
