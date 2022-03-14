@@ -1,10 +1,12 @@
 package ru.dmitrochenko.horsePuzzle.activity
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.text.SpannableStringBuilder
 import android.view.Gravity
 import android.view.View
@@ -14,10 +16,10 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.color
-import androidx.core.view.forEach
 import androidx.lifecycle.ViewModelProvider
 import ru.dmitrochenko.horsePuzzle.R
 import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmStartFieldDialog
@@ -355,17 +357,17 @@ class CheckBoard : AppCompatActivity() {
         confirmDialog.show(supportFragmentManager, "confirmStartFieldDialog")
     }
 
-    fun showWinPath() {
-        backBtn.isEnabled = false
-        forwardBtn.isEnabled = false
-        grid.forEach { (it as Field).unSetHorse() }
+    fun copyPathToClipBoard() {
+        val clipboard: ClipboardManager = ContextCompat.getSystemService(this, ClipboardManager::class.java)!!
+        val clip = ClipData.newPlainText(getString(R.string.copy_path), path.text)
+        clipboard.setPrimaryClip(clip)
 
-        for (m in boardModel.moves) {
-            (grid.getChildAt(m) as Field).setHorse()
-            SystemClock.sleep(500)
-        }
+        Toast.makeText(applicationContext, getString(R.string.path_copy_to_clip), Toast.LENGTH_LONG).show()
+        handler.postDelayed({ goToMainMenu() }, 500)
+    }
 
-        backBtn.isEnabled = true
-        forwardBtn.isEnabled = true
+    fun goToMainMenu() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
     }
 }

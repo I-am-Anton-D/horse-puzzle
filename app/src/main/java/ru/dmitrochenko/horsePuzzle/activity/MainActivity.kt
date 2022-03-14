@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import ru.dmitrochenko.horsePuzzle.R
+import ru.dmitrochenko.horsePuzzle.activity.dialog.AboutDialog
+import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmSettingsDialog
 
 class MainActivity : AppCompatActivity() {
     private lateinit var newGameBtn:Button
@@ -24,7 +26,8 @@ class MainActivity : AppCompatActivity() {
         exitBtn = findViewById(R.id.exit)
 
         aboutBtn.setOnClickListener{
-            Toast.makeText(this, "About button", Toast.LENGTH_SHORT).show()
+            val aboutDialog = AboutDialog()
+            aboutDialog.show(supportFragmentManager, "aboutDialog")
         }
 
         newGameBtn.setOnClickListener{

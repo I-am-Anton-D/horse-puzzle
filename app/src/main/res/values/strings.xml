@@ -32,8 +32,13 @@
     <string name="need_to_reach_start_field">Need to reach start field</string>
     <string name="no_combintaion_from_start_field">No combination from these start field, but if you want, you can try</string>
     <string name="congratulation">Congratulation</string>
-    <string name="you_win">You Win! Show you path?</string>
+    <string name="you_win">You Win! Copy your path to clip board?</string>
     <string name="showPath">Show</string>
     <string name="continiue">Continue</string>
     <string name="continueGame">Continue Game</string>
+    <string name="all_me">"All me \nCoded by Anton Dmitrochenko \nmotohd@yandex.ru "</string>
+    <string name="copy_path">Copy</string>
+    <string name="go_to_main_menu">Main Menu</string>
+    <string name="ok">Ok</string>
+    <string name="path_copy_to_clip">Path was coped to clipboard</string>
 </resources>

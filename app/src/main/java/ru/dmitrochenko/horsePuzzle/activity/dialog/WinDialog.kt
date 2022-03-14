@@ -15,13 +15,15 @@ class WinDialog : DialogFragment() {
             builder.setTitle(getString(R.string.congratulation))
                 .setMessage(getString(R.string.you_win))
                 .setCancelable(true)
-                .setPositiveButton(getString(R.string.showPath)) { _, _ ->
+                .setPositiveButton(getString(R.string.copy_path)) { _, _ ->
                     this.dismiss()
-                    (activity as CheckBoard).showWinPath()
+                    (activity as CheckBoard).copyPathToClipBoard()
                 }
-                .setNegativeButton(getString(R.string.cancel)
-                ) { _, _ -> }
-
+                .setNegativeButton(getString(R.string.go_to_main_menu)
+                ) { _, _ ->
+                    this.dismiss()
+                    (activity as CheckBoard).goToMainMenu()
+                }
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
