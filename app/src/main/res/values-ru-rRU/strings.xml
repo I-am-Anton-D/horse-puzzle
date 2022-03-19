@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">The Knight\'s Tour</string>
+    <string name="new_game">Новая игра</string>
+    <string name="about">Об игре</string>
+    <string name="settings">Настройки</string>
+    <string name="main_image">Главное изображение</string>
+    <string name="exit">Выход</string>
+    <string name="count_of_rows">Количество рядов:</string>
+    <string name="count_of_columns">Количество столбцов:</string>
+    <string name="finish_on_start">Вернуться на начальное поле</string>
+    <string name="count_of_hints">Количество подсказок</string>
+    <string name="count_of_rows_text">%1$s  (от 1 до %1$s)</string>
+    <string name="count_of_columns_text">%1$s  (от A до %2$s)</string>
+    <string name="choose_msg">Вы выбрали %1$s</string>
+    <string name="without_hints">без подсказок</string>
+    <string name="not_limited">неограниченно</string>
+    <string name="hint">Хинт</string>
+    <string name="start">Старт</string>
+    <string name="choose_start_field">Выберите начальное поле</string>
+    <string name="confirm_start_field">Поддтвердите начальное поле</string>
+    <string name="correct">Верно</string>
+    <string name="cancel">Отмена</string>
+    <string name="confirm_settings">Подтвердите настройки</string>
+    <string name="bad_settings">С данным настройками нет вариантов решения задачи, но если хотите, можете попробовать</string>
+    <string name="tryw">Попробую</string>
+    <string name="available_combination">Комбинации существуют</string>
+    <string name="maybe_not">Возможно кобминаций нет</string>
+    <string name="no_combination">Комбинаций НЕ сущесвует</string>
+    <string name="calculate">Вычисление…</string>
+    <string name="need_to_reach_start_field">Необходимо достичь стартового поля</string>
+    <string name="no_combintaion_from_start_field">Нет решения задачи с данного стартового поля, но если хотите, можете попробовать</string>
+    <string name="congratulation">Поздравялем!</string>
+    <string name="leftArrow"><![CDATA[<]]></string>
+    <string name="right_arrow"><![CDATA[>]]></string>
+    <string name="you_win">Вы победили! Скопирвать путь в буфер обмена?</string>
+    <string name="showPath">Показать</string>
+    <string name="continiue">Продолжить</string>
+    <string name="continueGame">Продолжить игру</string>
+    <string name="all_me">Все cам \nНаписано Антоном Дмитроченко \nmotohd@yandex.ru</string>
+    <string name="copy_path">Копировать</string>
+    <string name="go_to_main_menu">Главное меню</string>
+    <string name="ok">Ок</string>
+    <string name="path_copy_to_clip">Путь был скопирован в буфер обмена</string>
+</resources>

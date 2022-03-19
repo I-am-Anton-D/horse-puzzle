@@ -16,11 +16,11 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.color
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 import ru.dmitrochenko.horsePuzzle.R
 import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmStartFieldDialog
 import ru.dmitrochenko.horsePuzzle.activity.dialog.WinDialog
@@ -362,12 +362,14 @@ class CheckBoard : AppCompatActivity() {
         val clip = ClipData.newPlainText(getString(R.string.copy_path), path.text)
         clipboard.setPrimaryClip(clip)
 
-        Toast.makeText(applicationContext, getString(R.string.path_copy_to_clip), Toast.LENGTH_LONG).show()
-        handler.postDelayed({ goToMainMenu() }, 500)
+        Snackbar.make(grid, getString(R.string.path_copy_to_clip), Snackbar.LENGTH_LONG).show()
+        handler.postDelayed({ goToMainMenu() }, 2000)
     }
 
     fun goToMainMenu() {
         val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
+        finish()
     }
 }

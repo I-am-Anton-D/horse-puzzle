@@ -1,13 +1,11 @@
 package ru.dmitrochenko.horsePuzzle.activity
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import ru.dmitrochenko.horsePuzzle.R
 import ru.dmitrochenko.horsePuzzle.activity.dialog.AboutDialog
-import ru.dmitrochenko.horsePuzzle.activity.dialog.ConfirmSettingsDialog
 
 class MainActivity : AppCompatActivity() {
     private lateinit var newGameBtn:Button
@@ -36,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         exitBtn.setOnClickListener{
-            this.finish()
+            this.finishAffinity()
         }
     }
 }
