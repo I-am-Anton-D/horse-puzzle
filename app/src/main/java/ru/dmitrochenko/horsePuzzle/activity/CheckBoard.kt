@@ -29,8 +29,6 @@ import ru.dmitrochenko.horsePuzzle.model.BoardSettingsData
 import ru.dmitrochenko.horsePuzzle.model.CheckBoardModel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.stream.Collectors
-
 
 class CheckBoard : AppCompatActivity() {
     private var executor: ExecutorService = Executors.newSingleThreadExecutor()
@@ -246,12 +244,8 @@ class CheckBoard : AppCompatActivity() {
             availText.text = if (full) getString(R.string.no_combination) else getString(R.string.maybe_not)
         } else {
             hintBtn.isEnabled = boardModel.hints > 0
-            availText.text = getString(R.string.available_combination) + temp()
+            availText.text = getString(R.string.available_combination)
         }
-    }
-
-    private fun temp(): String {
-        return boardModel.getHintsPositions().stream().map { p -> boardModel.getFieldNameById(p.toInt()) }.collect(Collectors.joining(" "))
     }
 
     private fun setActiveHorse(position: Int) {
